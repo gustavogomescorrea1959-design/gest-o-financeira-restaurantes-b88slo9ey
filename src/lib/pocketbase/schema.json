@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-28T21:24:45.158Z",
+  "generatedAt": "2026-05-28T21:30:28.674Z",
   "collections": [
     {
       "name": "users",
       "type": "auth",
       "apiRules": {
-        "list": "id = @request.auth.id",
-        "view": "id = @request.auth.id",
-        "create": "",
-        "update": "id = @request.auth.id",
+        "list": "id = @request.auth.id || restaurant_id = @request.auth.restaurant_id",
+        "view": "id = @request.auth.id || restaurant_id = @request.auth.restaurant_id",
+        "create": null,
+        "update": "id = @request.auth.id || (@request.auth.role = 'admin' && restaurant_id = @request.auth.restaurant_id)",
         "delete": "id = @request.auth.id"
       },
       "fields": [
@@ -29,25 +29,326 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "restaurant_id",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "restaurants"
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["admin", "colaborador"]
         }
       ],
       "indexes": [
         "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
       ]
+    },
+    {
+      "name": "restaurants",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.restaurant_id = id",
+        "view": "@request.auth.restaurant_id = id",
+        "create": null,
+        "update": "@request.auth.restaurant_id = id && @request.auth.role = 'admin'",
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "responsavel_nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "email",
+          "type": "email",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "financial_categories",
+      "type": "base",
+      "apiRules": {
+        "list": "restaurant_id = @request.auth.restaurant_id",
+        "view": "restaurant_id = @request.auth.restaurant_id",
+        "create": "restaurant_id = @request.auth.restaurant_id && @request.auth.role = 'admin'",
+        "update": "restaurant_id = @request.auth.restaurant_id && @request.auth.role = 'admin'",
+        "delete": "restaurant_id = @request.auth.restaurant_id && @request.auth.role = 'admin'"
+      },
+      "fields": [
+        {
+          "name": "restaurant_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "restaurants"
+        },
+        {
+          "name": "grupo",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "subgrupo",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "nome_exibicao",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "tipo",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["receita", "custo", "despesa", "investimento", "resultado"]
+        },
+        {
+          "name": "ordem_visual",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "daily_entries",
+      "type": "base",
+      "apiRules": {
+        "list": "restaurant_id = @request.auth.restaurant_id",
+        "view": "restaurant_id = @request.auth.restaurant_id",
+        "create": "restaurant_id = @request.auth.restaurant_id",
+        "update": "restaurant_id = @request.auth.restaurant_id",
+        "delete": "restaurant_id = @request.auth.restaurant_id"
+      },
+      "fields": [
+        {
+          "name": "restaurant_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "restaurants"
+        },
+        {
+          "name": "categoria_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "financial_categories"
+        },
+        {
+          "name": "data",
+          "type": "date",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "valor",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "tipo_movimentacao",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["entrada", "saida"]
+        },
+        {
+          "name": "observacao",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "budget_entries",
+      "type": "base",
+      "apiRules": {
+        "list": "restaurant_id = @request.auth.restaurant_id",
+        "view": "restaurant_id = @request.auth.restaurant_id",
+        "create": "restaurant_id = @request.auth.restaurant_id",
+        "update": "restaurant_id = @request.auth.restaurant_id",
+        "delete": "restaurant_id = @request.auth.restaurant_id"
+      },
+      "fields": [
+        {
+          "name": "restaurant_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "restaurants"
+        },
+        {
+          "name": "categoria_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "financial_categories"
+        },
+        {
+          "name": "mes_referencia",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "valor_orcado",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "bank_balances",
+      "type": "base",
+      "apiRules": {
+        "list": "restaurant_id = @request.auth.restaurant_id",
+        "view": "restaurant_id = @request.auth.restaurant_id",
+        "create": "restaurant_id = @request.auth.restaurant_id",
+        "update": "restaurant_id = @request.auth.restaurant_id",
+        "delete": "restaurant_id = @request.auth.restaurant_id"
+      },
+      "fields": [
+        {
+          "name": "restaurant_id",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "restaurants"
+        },
+        {
+          "name": "data",
+          "type": "date",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "saldo_caixa",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "saldo_banco",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "total_caixas_fisicos",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
     }
   ]
 }
