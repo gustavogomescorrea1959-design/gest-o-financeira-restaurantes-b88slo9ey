@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { format } from 'date-fns'
+import { toast } from 'sonner'
 
 interface EntryFormProps {
   open: boolean
@@ -53,10 +54,12 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
         ...formData,
         data: new Date(formData.data + 'T12:00:00.000Z').toISOString(),
       })
+      toast.success('Lançamento salvo com sucesso!', { duration: 3000 })
       onSuccess()
       onOpenChange(false)
     } catch (err) {
       console.error(err)
+      toast.error('Erro ao salvar lançamento.')
     }
   }
 

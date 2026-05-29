@@ -25,7 +25,42 @@ export interface Budget extends RecordModel {
   expand?: { categoria_id: Category }
 }
 
+export interface BankBalance extends RecordModel {
+  data: string
+  saldo_caixa: number
+  saldo_banco: number
+  total_caixas_fisicos: number
+}
+
+export interface DashboardMetrics {
+  faturamento: number
+  totalEntradas: number
+  totalSaidas: number
+  saldoDia: number
+  cmv: number
+  margemContribuicao: number
+  resultadoOperacional: number
+}
+
 export const api = {
+  getDashboardMetrics: (startDate: string, endDate: string): Promise<DashboardMetrics> =>
+    pb.send('/backend/v1/dashboard-metrics', {
+      method: 'GET',
+      params: { startDate, endDate },
+    }),
+  getRecentEntries: () =>
+    pb
+      .collection<Entry>('daily_entries')
+      .getList(1, 10, { expand: 'categoria_id', sort: '-data,-created' }),
+  getLatestBalance: () =>
+    pb
+      .collection<BankBalance>('bank_balances')
+      .getList(1, 1, { sort: '-data,-created' })
+      .then((res) => res.items[0]),
+  createBalance: (data: Partial<BankBalance>) =>
+    pb
+      .collection('bank_balances')
+      .create({ ...data, restaurant_id: pb.authStore.record?.restaurant_id }),
   getCategories: () =>
     pb.collection<Category>('financial_categories').getFullList({ sort: 'ordem_visual' }),
   getAllEntries: () =>
