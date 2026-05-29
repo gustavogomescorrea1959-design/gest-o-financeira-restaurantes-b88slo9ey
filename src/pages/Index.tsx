@@ -67,15 +67,15 @@ export default function Dashboard() {
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center animate-fade-in">
-        <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-6">
+        <div className="w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6">
           <TrendingUp className="w-12 h-12" />
         </div>
-        <h2 className="text-3xl font-extrabold text-slate-800 mb-2">Bem-vindo ao GestãoRest!</h2>
-        <p className="text-slate-600 mb-8 max-w-md text-lg">
+        <h2 className="text-3xl font-extrabold text-foreground mb-2">Bem-vindo ao GestãoRest!</h2>
+        <p className="text-muted-foreground mb-8 max-w-md text-lg">
           Parece que você ainda não tem dados registrados. Que tal começar fazendo o seu primeiro
           lançamento?
         </p>
-        <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 shadow-md">
+        <Button asChild size="lg" className="shadow-md">
           <Link to="/lancamentos">Fazer Primeiro Lançamento</Link>
         </Button>
       </div>
@@ -83,76 +83,76 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-0 shadow-subtle">
+        <Card className="border border-border shadow-elevation rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Faturamento do Mês
             </CardTitle>
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-              <ArrowUpIcon className="w-4 h-4 text-emerald-600" />
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <ArrowUpIcon className="w-4 h-4 text-primary" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
+            <div className="text-3xl font-bold text-foreground">
               R$ {faturamento.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-subtle">
+        <Card className="border border-border shadow-elevation rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Custos / Despesas
             </CardTitle>
-            <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-              <ArrowDownIcon className="w-4 h-4 text-red-600" />
+            <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center">
+              <ArrowDownIcon className="w-4 h-4 text-accent" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-slate-800">
+            <div className="text-3xl font-bold text-foreground">
               R$ {despesas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-subtle">
+        <Card className="border border-border shadow-elevation rounded-xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-600 uppercase tracking-wider">
+            <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
               Resultado Líquido
             </CardTitle>
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-              <DollarSign className="w-4 h-4 text-indigo-600" />
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <DollarSign className="w-4 h-4 text-primary" />
             </div>
           </CardHeader>
           <CardContent>
             <div
-              className={`text-3xl font-bold ${resultado >= 0 ? 'text-emerald-600' : 'text-red-600'}`}
+              className={`text-3xl font-bold ${resultado >= 0 ? 'text-primary' : 'text-accent'}`}
             >
               {resultado >= 0 ? '+' : ''} R${' '}
               {resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-subtle bg-slate-800 text-white">
+        <Card className="border border-border shadow-elevation rounded-xl bg-sidebar text-sidebar-foreground">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+            <CardTitle className="text-sm font-semibold text-muted uppercase tracking-wider">
               Saldo em Caixa
             </CardTitle>
-            <Wallet className="w-5 h-5 text-emerald-400" />
+            <Wallet className="w-5 h-5 text-primary-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
               R$ {resultado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
-            <p className="text-xs text-slate-400 mt-2">Saldo estimado atual</p>
+            <p className="text-xs text-muted/70 mt-2">Saldo estimado atual</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid gap-6 md:grid-cols-7">
-        <Card className="md:col-span-4 border-0 shadow-subtle">
+        <Card className="md:col-span-4 border border-border shadow-elevation rounded-xl">
           <CardHeader>
-            <CardTitle className="text-lg text-slate-800">
+            <CardTitle className="text-lg text-foreground">
               Evolução Financeira (Últimos 6 meses)
             </CardTitle>
           </CardHeader>
@@ -160,7 +160,7 @@ export default function Dashboard() {
             <ChartContainer
               config={{
                 Receitas: { label: 'Receitas', color: 'hsl(var(--primary))' },
-                Despesas: { label: 'Despesas', color: 'hsl(var(--destructive))' },
+                Despesas: { label: 'Despesas', color: 'hsl(var(--accent))' },
               }}
               className="h-[350px] w-full"
             >
@@ -198,29 +198,29 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="md:col-span-3 border-0 shadow-subtle flex flex-col">
+        <Card className="md:col-span-3 border border-border shadow-elevation flex flex-col rounded-xl">
           <CardHeader>
-            <CardTitle className="text-lg text-slate-800">Lançamentos Recentes</CardTitle>
+            <CardTitle className="text-lg text-foreground">Lançamentos Recentes</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col">
-            <div className="space-y-5 flex-1">
+            <div className="space-y-6 flex-1">
               {entries.slice(0, 5).map((e) => (
                 <div key={e.id} className="flex items-center justify-between group">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div
-                      className={`w-2 h-2 rounded-full ${e.tipo_movimentacao === 'entrada' ? 'bg-emerald-500' : 'bg-red-500'}`}
+                      className={`w-2.5 h-2.5 rounded-full ${e.tipo_movimentacao === 'entrada' ? 'bg-primary' : 'bg-accent'}`}
                     />
                     <div>
-                      <p className="font-semibold text-sm text-slate-800 leading-none">
+                      <p className="font-bold text-sm text-foreground leading-none">
                         {e.expand?.categoria_id?.nome_exibicao || 'Categoria'}
                       </p>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1.5">
                         {format(parseISO(e.data), 'dd/MM/yyyy')}
                       </p>
                     </div>
                   </div>
                   <div
-                    className={`font-bold text-sm ${e.tipo_movimentacao === 'entrada' ? 'text-emerald-600' : 'text-red-600'}`}
+                    className={`font-bold text-sm ${e.tipo_movimentacao === 'entrada' ? 'text-primary' : 'text-accent'}`}
                   >
                     {e.tipo_movimentacao === 'entrada' ? '+' : '-'} R${' '}
                     {e.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -228,10 +228,10 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100">
+            <div className="mt-8 pt-4 border-t border-border">
               <Button
                 variant="ghost"
-                className="w-full text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                className="w-full text-primary hover:text-primary hover:bg-primary/5"
                 asChild
               >
                 <Link to="/lancamentos">Ver Todos os Lançamentos</Link>

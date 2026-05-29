@@ -29,7 +29,10 @@ export default function Layout() {
   return (
     <SidebarProvider>
       <Sidebar>
-        <SidebarHeader className="p-4 font-bold text-xl text-emerald-600 flex items-center gap-2">
+        <SidebarHeader className="p-4 font-bold text-xl text-primary-foreground flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary text-primary-foreground rounded-lg flex items-center justify-center">
+            GR
+          </div>
           <span>GestãoRest</span>
         </SidebarHeader>
         <SidebarContent>
@@ -88,26 +91,26 @@ export default function Layout() {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center justify-between border-b px-4 lg:h-16 bg-white">
+        <header className="flex h-14 items-center justify-between border-b px-4 lg:h-16 bg-card shadow-sm">
           <div className="flex items-center gap-4">
-            <SidebarTrigger />
-            <h1 className="text-lg font-semibold capitalize text-slate-800">
+            <SidebarTrigger className="text-foreground" />
+            <h1 className="text-lg font-bold capitalize text-foreground">
               {location.pathname === '/' ? 'Dashboard' : location.pathname.slice(1)}
             </h1>
           </div>
           <div className="flex items-center gap-4">
-            <Bell className="w-5 h-5 text-slate-500 cursor-pointer hover:text-slate-800 transition-colors" />
+            <Bell className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-primary transition-colors duration-150" />
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center font-bold text-sm">
+              <div className="w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-sm">
                 {(user?.name || user?.email || '?').charAt(0).toUpperCase()}
               </div>
-              <span className="text-sm font-medium text-slate-700 hidden sm:inline-block">
+              <span className="text-sm font-medium text-foreground hidden sm:inline-block">
                 {user?.name || user?.email}
               </span>
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-auto bg-slate-50 p-4 md:p-6">
+        <main className="flex-1 overflow-auto bg-background p-4 md:p-8 space-y-6">
           <Outlet />
         </main>
       </SidebarInset>

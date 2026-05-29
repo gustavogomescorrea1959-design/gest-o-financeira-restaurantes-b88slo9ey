@@ -67,24 +67,32 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
           <SheetTitle>Novo Lançamento</SheetTitle>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          <div className="space-y-2">
-            <Label className="text-slate-600">Tipo</Label>
+          <div className="space-y-3">
+            <Label className="text-muted-foreground text-sm uppercase tracking-wider">
+              Tipo de Lançamento
+            </Label>
             <RadioGroup
               value={formData.tipo_movimentacao}
               onValueChange={(val) =>
                 setFormData({ ...formData, tipo_movimentacao: val as 'entrada' | 'saida' })
               }
-              className="flex gap-6"
+              className="flex gap-4"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="entrada" id="entrada" />
-                <Label htmlFor="entrada" className="text-emerald-600 font-medium cursor-pointer">
+              <div className="flex-1">
+                <RadioGroupItem value="entrada" id="entrada" className="peer sr-only" />
+                <Label
+                  htmlFor="entrada"
+                  className="flex items-center justify-center px-4 py-3 border border-border rounded-lg cursor-pointer hover:bg-primary/5 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary text-foreground transition-all font-semibold"
+                >
                   Entrada (+)
                 </Label>
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="saida" id="saida" />
-                <Label htmlFor="saida" className="text-red-600 font-medium cursor-pointer">
+              <div className="flex-1">
+                <RadioGroupItem value="saida" id="saida" className="peer sr-only" />
+                <Label
+                  htmlFor="saida"
+                  className="flex items-center justify-center px-4 py-3 border border-border rounded-lg cursor-pointer hover:bg-accent/5 peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/10 peer-data-[state=checked]:text-accent text-foreground transition-all font-semibold"
+                >
                   Saída (-)
                 </Label>
               </div>
@@ -160,10 +168,7 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 h-11 text-base"
-          >
+          <Button type="submit" className="w-full h-12 text-base shadow-sm mt-4">
             Salvar Lançamento
           </Button>
         </form>

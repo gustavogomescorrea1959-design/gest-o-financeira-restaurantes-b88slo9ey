@@ -48,15 +48,15 @@ export default function Reports() {
   }, [entries])
 
   const COLORS = [
-    '#10b981',
-    '#3b82f6',
-    '#f59e0b',
-    '#ef4444',
-    '#8b5cf6',
-    '#ec4899',
-    '#64748b',
-    '#14b8a6',
-    '#f43f5e',
+    '#2D5016', // Moss Green
+    '#C75B2A', // Burnt Orange
+    '#3D2B1F', // Dark Brown
+    '#4A7C25', // Lighter Green
+    '#D97A4D', // Lighter Orange
+    '#5C4533', // Lighter Brown
+    '#1B330B', // Darker Green
+    '#A34117', // Darker Orange
+    '#80624C', // Tan
   ]
 
   const chartConfig = useMemo(() => {
@@ -71,15 +71,15 @@ export default function Reports() {
   }, [expensesByCategory])
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex justify-between items-center bg-white p-4 rounded-lg border shadow-sm">
-        <h2 className="text-xl font-bold text-slate-800">Relatórios Financeiros</h2>
+    <div className="space-y-8 animate-fade-in">
+      <div className="flex justify-between items-center bg-card p-6 rounded-xl border border-border shadow-elevation">
+        <h2 className="text-2xl font-bold text-foreground">Relatórios Financeiros</h2>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="border-0 shadow-subtle">
+        <Card className="border border-border shadow-elevation rounded-xl">
           <CardHeader>
-            <CardTitle className="text-lg text-slate-800">
+            <CardTitle className="text-lg text-foreground">
               Despesas por Categoria (Mês Atual)
             </CardTitle>
           </CardHeader>
@@ -107,7 +107,7 @@ export default function Reports() {
                 </ResponsiveContainer>
               </ChartContainer>
             ) : (
-              <div className="h-[350px] flex items-center justify-center text-slate-500">
+              <div className="h-[350px] flex items-center justify-center text-muted-foreground">
                 Nenhuma despesa registrada no mês atual.
               </div>
             )}
