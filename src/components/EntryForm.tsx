@@ -26,29 +26,58 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
   const [formData, setFormData] = useState<Partial<Entry>>({
     data: format(new Date(), 'yyyy-MM-dd'),
     tipo_movimentacao: 'saida',
-    valor: 0,
+    valor: undefined,
     observacao: '',
+    categoria_id: '',
   })
+
   const [selectedGroup, setSelectedGroup] = useState<string>('')
+  const [selectedSubgroup, setSelectedSubgroup] = useState<string>('')
 
   useEffect(() => {
     if (open) {
-      api.getCategories().then(setCategories)
+      api
+        .getCategories()
+        .then(setCategories)
+        .catch(() => toast.error('Falha ao carregar categorias.'))
       setFormData({
         data: format(new Date(), 'yyyy-MM-dd'),
         tipo_movimentacao: 'saida',
         valor: undefined,
         observacao: '',
+        categoria_id: '',
       })
       setSelectedGroup('')
+      setSelectedSubgroup('')
     }
   }, [open])
 
   const groups = Array.from(new Set(categories.map((c) => c.grupo)))
-  const filteredCategories = categories.filter((c) => c.grupo === selectedGroup)
+  const subgroups = Array.from(
+    new Set(categories.filter((c) => c.grupo === selectedGroup).map((c) => c.subgrupo)),
+  )
+  const accounts = categories.filter(
+    (c) => c.grupo === selectedGroup && c.subgrupo === selectedSubgroup,
+  )
+
+  const handleGroupChange = (val: string) => {
+    setSelectedGroup(val)
+    setSelectedSubgroup('')
+    setFormData({ ...formData, categoria_id: '' })
+  }
+
+  const handleSubgroupChange = (val: string) => {
+    setSelectedSubgroup(val)
+    setFormData({ ...formData, categoria_id: '' })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!formData.categoria_id) {
+      toast.error('Você deve selecionar uma Conta (Nível 3) para o lançamento.')
+      return
+    }
+
     try {
       await api.createEntry({
         ...formData,
@@ -67,9 +96,9 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Novo Lançamento</SheetTitle>
+          <SheetTitle className="text-foreground">Novo Lançamento</SheetTitle>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+        <form onSubmit={handleSubmit} className="space-y-5 mt-6">
           <div className="space-y-3">
             <Label className="text-muted-foreground text-sm uppercase tracking-wider">
               Tipo de Lançamento
@@ -85,7 +114,7 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
                 <RadioGroupItem value="entrada" id="entrada" className="peer sr-only" />
                 <Label
                   htmlFor="entrada"
-                  className="flex items-center justify-center px-4 py-3 border border-border rounded-lg cursor-pointer hover:bg-primary/5 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary text-foreground transition-all font-semibold"
+                  className="flex items-center justify-center px-4 py-3 border border-border rounded-lg cursor-pointer hover:bg-primary/5 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary text-foreground transition-all duration-150 font-semibold shadow-sm"
                 >
                   Entrada (+)
                 </Label>
@@ -94,7 +123,7 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
                 <RadioGroupItem value="saida" id="saida" className="peer sr-only" />
                 <Label
                   htmlFor="saida"
-                  className="flex items-center justify-center px-4 py-3 border border-border rounded-lg cursor-pointer hover:bg-accent/5 peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/10 peer-data-[state=checked]:text-accent text-foreground transition-all font-semibold"
+                  className="flex items-center justify-center px-4 py-3 border border-border rounded-lg cursor-pointer hover:bg-accent/5 peer-data-[state=checked]:border-accent peer-data-[state=checked]:bg-accent/10 peer-data-[state=checked]:text-accent text-foreground transition-all duration-150 font-semibold shadow-sm"
                 >
                   Saída (-)
                 </Label>
@@ -109,6 +138,7 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
               value={formData.data}
               onChange={(e) => setFormData({ ...formData, data: e.target.value })}
               required
+              className="transition-all duration-150"
             />
           </div>
 
@@ -122,13 +152,14 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
               onChange={(e) => setFormData({ ...formData, valor: parseFloat(e.target.value) })}
               required
               placeholder="0,00"
+              className="transition-all duration-150"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Grupo</Label>
-            <Select value={selectedGroup} onValueChange={setSelectedGroup} required>
-              <SelectTrigger>
+            <Label>Grupo (Nível 1)</Label>
+            <Select value={selectedGroup} onValueChange={handleGroupChange} required>
+              <SelectTrigger className="transition-all duration-150">
                 <SelectValue placeholder="Selecione o grupo" />
               </SelectTrigger>
               <SelectContent>
@@ -142,20 +173,41 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Categoria</Label>
+            <Label>Categoria (Nível 2)</Label>
             <Select
-              value={formData.categoria_id}
-              onValueChange={(val) => setFormData({ ...formData, categoria_id: val })}
+              value={selectedSubgroup}
+              onValueChange={handleSubgroupChange}
               disabled={!selectedGroup}
               required
             >
-              <SelectTrigger>
+              <SelectTrigger className="transition-all duration-150">
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
               <SelectContent>
-                {filteredCategories.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.nome_exibicao}
+                {subgroups.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Conta (Nível 3)</Label>
+            <Select
+              value={formData.categoria_id}
+              onValueChange={(val) => setFormData({ ...formData, categoria_id: val })}
+              disabled={!selectedSubgroup}
+              required
+            >
+              <SelectTrigger className="transition-all duration-150">
+                <SelectValue placeholder="Selecione a conta" />
+              </SelectTrigger>
+              <SelectContent>
+                {accounts.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>
+                    {a.nome_exibicao}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -168,10 +220,14 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
               value={formData.observacao}
               onChange={(e) => setFormData({ ...formData, observacao: e.target.value })}
               placeholder="Ex: Pagamento de fornecedor X"
+              className="transition-all duration-150"
             />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base shadow-sm mt-4">
+          <Button
+            type="submit"
+            className="w-full h-12 text-base shadow-sm mt-4 transition-all duration-150 hover:bg-primary/90"
+          >
             Salvar Lançamento
           </Button>
         </form>

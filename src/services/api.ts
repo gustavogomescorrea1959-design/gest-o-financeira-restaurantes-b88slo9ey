@@ -40,6 +40,10 @@ export interface DashboardMetrics {
   cmv: number
   margemContribuicao: number
   resultadoOperacional: number
+  custosVariaveis: number
+  despesasFixas: number
+  despesasNaoOperacionais: number
+  receitasNaoOperacionais: number
 }
 
 export const api = {

@@ -12,6 +12,7 @@ import Login from './pages/Login'
 import Entries from './pages/Entries'
 import Budget from './pages/Budget'
 import Reports from './pages/Reports'
+import CategoriesTree from './pages/CategoriesTree'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/lancamentos" element={<Entries />} />
             <Route path="/orcamento" element={<Budget />} />
             <Route path="/relatorios" element={<Reports />} />
+            <Route path="/categorias" element={<CategoriesTree />} />
             {/* ADD ALL CUSTOM ROUTES MUST BE ADDED HERE */}
           </Route>
           <Route path="*" element={<NotFound />} />

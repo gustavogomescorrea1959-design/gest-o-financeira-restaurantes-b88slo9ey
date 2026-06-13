@@ -20,6 +20,7 @@ import {
   LogOut,
   Settings,
   Bell,
+  Layers,
 } from 'lucide-react'
 
 export default function Layout() {
@@ -66,6 +67,14 @@ export default function Layout() {
                 <Link to="/relatorios">
                   <PieChart />
                   <span>Relatórios</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={location.pathname === '/categorias'}>
+                <Link to="/categorias">
+                  <Layers />
+                  <span>Categorias</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
