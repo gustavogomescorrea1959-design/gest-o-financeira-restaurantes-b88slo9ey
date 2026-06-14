@@ -68,15 +68,38 @@ export default function Dashboard() {
       setError(false)
       const { start, end } = getTimeframeDates(timeframe)
 
-      const [metricsData, recentData, balanceData] = await Promise.all([
+      const [metricsResult, recentResult, balanceResult] = await Promise.allSettled([
         api.getDashboardMetrics(start.toISOString(), end.toISOString()),
         api.getRecentEntries(),
         api.getLatestBalance(),
       ])
 
-      setMetrics(metricsData)
-      setEntries(recentData.items)
-      setLatestBalance(balanceData)
+      if (metricsResult.status === 'fulfilled') {
+        setMetrics(metricsResult.value)
+      } else {
+        if (metricsResult.reason?.status !== 404) {
+          console.error('Failed to load metrics:', metricsResult.reason)
+        }
+        setMetrics(null)
+      }
+
+      if (recentResult.status === 'fulfilled') {
+        setEntries(recentResult.value?.items || [])
+      } else {
+        if (recentResult.reason?.status !== 404) {
+          console.error('Failed to load entries:', recentResult.reason)
+        }
+        setEntries([])
+      }
+
+      if (balanceResult.status === 'fulfilled') {
+        setLatestBalance(balanceResult.value)
+      } else {
+        if (balanceResult.reason?.status !== 404) {
+          console.error('Failed to load balance:', balanceResult.reason)
+        }
+        setLatestBalance(null)
+      }
     } catch (err) {
       console.error(err)
       setError(true)
@@ -257,7 +280,7 @@ export default function Dashboard() {
                   <Skeleton key={i} className="h-12 w-full" />
                 ))
               ) : (
-                <>
+                <div className="contents">
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border border-border/50">
                     <span className="text-sm font-medium text-muted-foreground">
                       Saldo de Caixa
@@ -282,7 +305,7 @@ export default function Dashboard() {
                       {formatCurrency(latestBalance?.total_caixas_fisicos || 0)}
                     </span>
                   </div>
-                </>
+                </div>
               )}
               <Button
                 variant="outline"
@@ -306,7 +329,7 @@ export default function Dashboard() {
                   <Skeleton key={i} className="h-10 w-full bg-sidebar-accent/50" />
                 ))
               ) : (
-                <>
+                <div className="contents">
                   <div>
                     <div className="flex justify-between text-sm mb-1 text-sidebar-foreground/80">
                       <span>CMV</span>
@@ -333,7 +356,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
-                </>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -395,12 +418,12 @@ export default function Dashboard() {
                         <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
                           <span>{format(parseISO(e.data), 'dd/MM/yyyy')}</span>
                           {e.observacao && (
-                            <>
+                            <div className="contents">
                               <span className="w-1 h-1 rounded-full bg-border" />
                               <span className="truncate max-w-[120px] sm:max-w-[200px]">
                                 {e.observacao}
                               </span>
-                            </>
+                            </div>
                           )}
                         </div>
                       </div>

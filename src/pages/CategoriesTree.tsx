@@ -27,10 +27,14 @@ export default function CategoriesTree() {
   }, [])
 
   const tree: Record<string, Record<string, Category[]>> = {}
-  categories.forEach((cat) => {
-    if (!tree[cat.grupo]) tree[cat.grupo] = {}
-    if (!tree[cat.grupo][cat.subgrupo]) tree[cat.grupo][cat.subgrupo] = []
-    tree[cat.grupo][cat.subgrupo].push(cat)
+  const sortedCategories = [...categories].sort((a, b) => a.ordem_visual - b.ordem_visual)
+
+  sortedCategories.forEach((cat) => {
+    const grupo = cat.grupo || 'Outros'
+    const subgrupo = cat.subgrupo || 'Geral'
+    if (!tree[grupo]) tree[grupo] = {}
+    if (!tree[grupo][subgrupo]) tree[grupo][subgrupo] = []
+    tree[grupo][subgrupo].push(cat)
   })
 
   return (
@@ -68,7 +72,7 @@ export default function CategoriesTree() {
                   value={grupo}
                   className="border rounded-lg px-4 bg-card shadow-sm transition-all duration-150"
                 >
-                  <AccordionTrigger className="hover:no-underline font-bold text-lg text-primary py-4">
+                  <AccordionTrigger className="hover:no-underline font-bold text-lg text-primary py-4 uppercase">
                     {grupo}
                   </AccordionTrigger>
                   <AccordionContent className="pt-2 pb-4">
@@ -78,7 +82,7 @@ export default function CategoriesTree() {
                     >
                       {Object.entries(subgrupos).map(([subgrupo, contas]) => (
                         <AccordionItem key={subgrupo} value={subgrupo} className="border-none">
-                          <AccordionTrigger className="hover:no-underline py-2 font-semibold text-accent flex gap-2 justify-start">
+                          <AccordionTrigger className="hover:no-underline py-2 font-semibold text-accent flex gap-2 justify-start uppercase text-sm">
                             <FolderTree className="w-4 h-4" /> {subgrupo}
                           </AccordionTrigger>
                           <AccordionContent>
@@ -89,8 +93,8 @@ export default function CategoriesTree() {
                                   className="flex items-center gap-2 text-sm text-foreground bg-muted/30 px-3 py-2 rounded-md border border-border/50 hover:bg-muted/50 transition-colors duration-150"
                                 >
                                   <FileText className="w-4 h-4 text-muted-foreground" />
-                                  {conta.nome_exibicao}
-                                  <span className="ml-auto text-xs font-medium text-muted-foreground uppercase bg-background px-2 py-1 rounded shadow-sm">
+                                  <span className="font-medium">{conta.nome_exibicao}</span>
+                                  <span className="ml-auto text-xs font-semibold text-muted-foreground uppercase bg-background px-2 py-1 rounded shadow-sm border">
                                     {conta.tipo}
                                   </span>
                                 </li>

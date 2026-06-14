@@ -1,84 +1,88 @@
 routerAdd(
   'GET',
-  '/backend/v1/dashboard-metrics',
+  '/backend/v1/metrics',
   (e) => {
+    const q = e.requestInfo().query
+    const start =
+      q.start || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+    const end =
+      q.end || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString()
+
     const restaurantId = e.auth?.get('restaurant_id')
     if (!restaurantId) return e.unauthorizedError('auth required')
 
-    const startDate = e.request.url.query().get('startDate')
-    const endDate = e.request.url.query().get('endDate')
-
-    let dateFilter = ''
-    if (startDate && endDate) {
-      dateFilter = ` && data >= '${startDate}' && data <= '${endDate}'`
-    }
-
     const entries = $app.findRecordsByFilter(
       'daily_entries',
-      `restaurant_id = '${restaurantId}'${dateFilter}`,
+      'restaurant_id = {:rId} && data >= {:start} && data <= {:end}',
       '',
       10000,
       0,
+      { rId: restaurantId, start, end },
     )
-
-    $apis.enrichRecords(e, entries, 'categoria_id')
 
     let faturamento = 0
     let cmv = 0
-    let descartaveis = 0
-    let impostos = 0
-    let custosVendas = 0
+    let custosVariaveis = 0
     let despesasFixas = 0
-    let despesasNaoOperacionais = 0
     let receitasNaoOperacionais = 0
+    let despesasNaoOperacionais = 0
+
     let totalEntradas = 0
     let totalSaidas = 0
 
     for (const entry of entries) {
       const val = entry.getFloat('valor')
-      const tipo = entry.getString('tipo_movimentacao')
-      const cat = entry.expandedOne('categoria_id')
-      if (!cat) continue
+      const tipoMov = entry.getString('tipo_movimentacao')
+      if (tipoMov === 'entrada') totalEntradas += val
+      else if (tipoMov === 'saida') totalSaidas += val
 
-      const grupo = cat.getString('grupo')
+      const catId = entry.getString('categoria_id')
+      let cat
+      try {
+        cat = $app.findRecordById('financial_categories', catId)
+      } catch (err) {
+        continue
+      }
+
+      const tipo = cat.getString('tipo')
       const subgrupo = cat.getString('subgrupo')
 
-      if (tipo === 'entrada') totalEntradas += val
-      if (tipo === 'saida') totalSaidas += val
-
-      if (grupo === 'FATURAMENTO DIA') {
+      // Match exact rules mapped on migration
+      if (tipo === 'receita') {
         faturamento += val
-      } else if (grupo === 'CUSTOS VARIÁVEIS') {
-        if (subgrupo === 'CMV') cmv += val
-        else if (subgrupo === 'Descartáveis') descartaveis += val
-        else if (subgrupo === 'Impostos') impostos += val
-        else if (subgrupo === 'Custos de Vendas') custosVendas += val
-      } else if (grupo === 'DESPESAS FIXAS') {
+      } else if (tipo === 'custo') {
+        custosVariaveis += val
+        if (
+          subgrupo === 'Custos com Matéria Prima' ||
+          subgrupo === 'Custos com Materiais de Venda Direta'
+        ) {
+          cmv += val
+        }
+      } else if (tipo === 'despesa') {
         despesasFixas += val
-      } else if (grupo === 'DESPESAS NÃO OPERACIONAIS') {
-        despesasNaoOperacionais += val
-      } else if (grupo === 'RECEITAS NÃO OPERACIONAIS') {
+      } else if (tipo === 'resultado') {
         receitasNaoOperacionais += val
+      } else if (tipo === 'investimento') {
+        despesasNaoOperacionais += val
       }
     }
 
-    const custosVariaveis = cmv + descartaveis + impostos + custosVendas
     const margemContribuicao = faturamento - custosVariaveis
     const resultadoOperacional = margemContribuicao - despesasFixas
     const saldoDia = totalEntradas - totalSaidas
 
     return e.json(200, {
       faturamento,
+      cmv,
+      custosVariaveis,
+      margemContribuicao,
+      despesasFixas,
+      resultadoOperacional,
+      receitasNaoOperacionais,
+      despesasNaoOperacionais,
       totalEntradas,
       totalSaidas,
       saldoDia,
-      cmv,
-      margemContribuicao,
-      resultadoOperacional,
-      custosVariaveis,
-      despesasFixas,
-      despesasNaoOperacionais,
-      receitasNaoOperacionais,
     })
   },
   $apis.requireAuth(),

@@ -38,7 +38,9 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
     if (open) {
       api
         .getCategories()
-        .then(setCategories)
+        .then((cats) => {
+          setCategories(cats.sort((a, b) => a.ordem_visual - b.ordem_visual))
+        })
         .catch(() => toast.error('Falha ao carregar categorias.'))
       setFormData({
         data: format(new Date(), 'yyyy-MM-dd'),
@@ -52,13 +54,26 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
     }
   }, [open])
 
-  const groups = Array.from(new Set(categories.map((c) => c.grupo)))
+  // Automate grouping and filtering mapping valid types
+  const validTypes =
+    formData.tipo_movimentacao === 'entrada'
+      ? ['receita', 'resultado']
+      : ['custo', 'despesa', 'investimento']
+  const filteredCategories = categories.filter((c) => validTypes.includes(c.tipo))
+
+  const groups = Array.from(new Set(filteredCategories.map((c) => c.grupo)))
   const subgroups = Array.from(
-    new Set(categories.filter((c) => c.grupo === selectedGroup).map((c) => c.subgrupo)),
+    new Set(filteredCategories.filter((c) => c.grupo === selectedGroup).map((c) => c.subgrupo)),
   )
-  const accounts = categories.filter(
+  const accounts = filteredCategories.filter(
     (c) => c.grupo === selectedGroup && c.subgrupo === selectedSubgroup,
   )
+
+  const handleTypeChange = (val: 'entrada' | 'saida') => {
+    setFormData({ ...formData, tipo_movimentacao: val, categoria_id: '' })
+    setSelectedGroup('')
+    setSelectedSubgroup('')
+  }
 
   const handleGroupChange = (val: string) => {
     setSelectedGroup(val)
@@ -105,9 +120,7 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
             </Label>
             <RadioGroup
               value={formData.tipo_movimentacao}
-              onValueChange={(val) =>
-                setFormData({ ...formData, tipo_movimentacao: val as 'entrada' | 'saida' })
-              }
+              onValueChange={(val) => handleTypeChange(val as 'entrada' | 'saida')}
               className="flex gap-4"
             >
               <div className="flex-1">
@@ -158,7 +171,12 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
 
           <div className="space-y-2">
             <Label>Grupo (Nível 1)</Label>
-            <Select value={selectedGroup} onValueChange={handleGroupChange} required>
+            <Select
+              value={selectedGroup}
+              onValueChange={handleGroupChange}
+              required
+              disabled={!formData.tipo_movimentacao}
+            >
               <SelectTrigger className="transition-all duration-150">
                 <SelectValue placeholder="Selecione o grupo" />
               </SelectTrigger>

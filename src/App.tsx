@@ -1,4 +1,5 @@
 /* Main App Component - Handles routing (using react-router-dom), query client and other providers - use this file to add all routes */
+import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
@@ -32,7 +33,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" replace />
   }
 
-  return <>{children}</>
+  return children as React.ReactElement
 }
 
 const App = () => (

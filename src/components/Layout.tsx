@@ -22,6 +22,7 @@ import {
   Bell,
   Layers,
 } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export default function Layout() {
   const { signOut, user } = useAuth()
@@ -110,9 +111,17 @@ export default function Layout() {
           <div className="flex items-center gap-4">
             <Bell className="w-5 h-5 text-muted-foreground cursor-pointer hover:text-primary transition-colors duration-150" />
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-sm">
-                {(user?.name || user?.email || '?').charAt(0).toUpperCase()}
-              </div>
+              <Avatar className="w-8 h-8 border border-primary/20">
+                {user?.avatar && (
+                  <AvatarImage
+                    src={`${import.meta.env.VITE_POCKETBASE_URL}/api/files/users/${user.id}/${user.avatar}`}
+                    alt={user?.name || 'User Avatar'}
+                  />
+                )}
+                <AvatarFallback className="bg-primary/20 text-primary font-bold text-sm">
+                  {(user?.name || user?.email || '?').charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
               <span className="text-sm font-medium text-foreground hidden sm:inline-block">
                 {user?.name || user?.email}
               </span>
