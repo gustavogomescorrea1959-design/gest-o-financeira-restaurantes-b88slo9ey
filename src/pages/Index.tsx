@@ -118,6 +118,9 @@ export default function Dashboard() {
   useRealtime('bank_balances', () => {
     loadData()
   })
+  useRealtime('budget_entries', () => {
+    loadData()
+  })
 
   const formatCurrency = (val: number) =>
     `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`

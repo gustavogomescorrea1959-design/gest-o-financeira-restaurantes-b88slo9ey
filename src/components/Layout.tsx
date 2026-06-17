@@ -21,6 +21,8 @@ import {
   Settings,
   Bell,
   Layers,
+  Wallet,
+  ClipboardList,
 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
@@ -76,6 +78,22 @@ export default function Layout() {
                 <Link to="/categorias">
                   <Layers />
                   <span>Categorias</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={location.pathname === '/saldos'}>
+                <Link to="/saldos">
+                  <Wallet />
+                  <span>Saldos</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={location.pathname === '/analise-fechamento'}>
+                <Link to="/analise-fechamento">
+                  <ClipboardList />
+                  <span>Análise & Fechamento</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

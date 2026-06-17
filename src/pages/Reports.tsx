@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, FileText, PieChart as PieChartIcon } from 'lucide-react'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart'
+import { useRealtime } from '@/hooks/use-realtime'
 
 export default function Reports() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
@@ -34,6 +35,16 @@ export default function Reports() {
   useEffect(() => {
     loadData()
   }, [currentDate])
+
+  useRealtime('daily_entries', () => {
+    loadData()
+  })
+  useRealtime('budget_entries', () => {
+    loadData()
+  })
+  useRealtime('bank_balances', () => {
+    loadData()
+  })
 
   const prevMonth = () =>
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
@@ -186,8 +197,8 @@ export default function Reports() {
               Demonstrativo de Resultados do Exercício formatado por grupos.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-1">
+          <CardContent className="overflow-x-auto">
+            <div className="space-y-1 min-w-[500px]">
               {dreData.map((row, i) => (
                 <div
                   key={i}
