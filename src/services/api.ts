@@ -61,14 +61,25 @@ export const api = {
       .collection<BankBalance>('bank_balances')
       .getList(1, 1, { sort: '-data,-created' })
       .then((res) => res.items[0]),
+  getAllBalances: () =>
+    pb.collection<BankBalance>('bank_balances').getFullList({ sort: '-data,-created' }),
   createBalance: (data: Partial<BankBalance>) =>
     pb
       .collection('bank_balances')
       .create({ ...data, restaurant_id: pb.authStore.record?.restaurant_id }),
+  updateBalance: (id: string, data: Partial<BankBalance>) =>
+    pb.collection('bank_balances').update(id, data),
+  deleteBalance: (id: string) => pb.collection('bank_balances').delete(id),
   getCategories: () =>
     pb.collection<Category>('financial_categories').getFullList({ sort: 'ordem_visual' }),
   getAllEntries: () =>
     pb.collection<Entry>('daily_entries').getFullList({ expand: 'categoria_id', sort: '-data' }),
+  getEntriesByDateRange: (startDate: string, endDate: string) =>
+    pb.collection<Entry>('daily_entries').getFullList({
+      filter: `data >= '${startDate}' && data <= '${endDate}'`,
+      expand: 'categoria_id',
+      sort: '-data,-created',
+    }),
   createEntry: (data: Partial<Entry>) =>
     pb
       .collection('daily_entries')

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { api } from '@/services/api'
+import { api, BankBalance } from '@/services/api'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,9 +11,10 @@ interface BalanceFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  initialData?: BankBalance | null
 }
 
-export function BalanceForm({ open, onOpenChange, onSuccess }: BalanceFormProps) {
+export function BalanceForm({ open, onOpenChange, onSuccess, initialData }: BalanceFormProps) {
   const [formData, setFormData] = useState({
     data: format(new Date(), 'yyyy-MM-dd'),
     saldo_caixa: 0,
@@ -23,43 +24,60 @@ export function BalanceForm({ open, onOpenChange, onSuccess }: BalanceFormProps)
 
   useEffect(() => {
     if (open) {
-      setFormData({
-        data: format(new Date(), 'yyyy-MM-dd'),
-        saldo_caixa: 0,
-        saldo_banco: 0,
-        total_caixas_fisicos: 0,
-      })
-      api
-        .getLatestBalance()
-        .then((latest) => {
-          if (latest) {
-            setFormData((prev) => ({
-              ...prev,
-              saldo_caixa: latest.saldo_caixa || 0,
-              saldo_banco: latest.saldo_banco || 0,
-              total_caixas_fisicos: latest.total_caixas_fisicos || 0,
-            }))
-          }
+      if (initialData) {
+        setFormData({
+          data: initialData.data.split('T')[0],
+          saldo_caixa: initialData.saldo_caixa || 0,
+          saldo_banco: initialData.saldo_banco || 0,
+          total_caixas_fisicos: initialData.total_caixas_fisicos || 0,
         })
-        .catch(() => {})
+      } else {
+        setFormData({
+          data: format(new Date(), 'yyyy-MM-dd'),
+          saldo_caixa: 0,
+          saldo_banco: 0,
+          total_caixas_fisicos: 0,
+        })
+        api
+          .getLatestBalance()
+          .then((latest) => {
+            if (latest) {
+              setFormData((prev) => ({
+                ...prev,
+                saldo_caixa: latest.saldo_caixa || 0,
+                saldo_banco: latest.saldo_banco || 0,
+                total_caixas_fisicos: latest.total_caixas_fisicos || 0,
+              }))
+            }
+          })
+          .catch(() => {})
+      }
     }
-  }, [open])
+  }, [open, initialData])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await api.createBalance({
+      const payload = {
         data: new Date(formData.data + 'T12:00:00.000Z').toISOString(),
         saldo_caixa: formData.saldo_caixa,
         saldo_banco: formData.saldo_banco,
         total_caixas_fisicos: formData.total_caixas_fisicos,
-      })
-      toast.success('Saldos atualizados com sucesso!', { duration: 3000 })
+      }
+
+      if (initialData?.id) {
+        await api.updateBalance(initialData.id, payload)
+        toast.success('Saldos atualizados com sucesso!', { duration: 3000 })
+      } else {
+        await api.createBalance(payload)
+        toast.success('Saldos registrados com sucesso!', { duration: 3000 })
+      }
+
       onSuccess()
       onOpenChange(false)
     } catch (err) {
       console.error(err)
-      toast.error('Erro ao atualizar saldos.')
+      toast.error('Erro ao salvar saldos.')
     }
   }
 
@@ -67,7 +85,7 @@ export function BalanceForm({ open, onOpenChange, onSuccess }: BalanceFormProps)
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Atualizar Saldos</SheetTitle>
+          <SheetTitle>{initialData ? 'Editar Saldos' : 'Atualizar Saldos'}</SheetTitle>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-6">
           <div className="space-y-2">
