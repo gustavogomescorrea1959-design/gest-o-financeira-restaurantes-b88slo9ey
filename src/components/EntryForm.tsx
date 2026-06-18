@@ -47,6 +47,7 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
         tipo_movimentacao: 'saida',
         valor: undefined,
         observacao: '',
+        forma_pagamento: '',
         categoria_id: '',
       })
       setSelectedGroup('')
@@ -233,7 +234,34 @@ export function EntryForm({ open, onOpenChange, onSuccess }: EntryFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Observação (Opcional)</Label>
+            <Label>Forma de Pagamento (Opcional)</Label>
+            <Select
+              value={formData.forma_pagamento}
+              onValueChange={(val) => setFormData({ ...formData, forma_pagamento: val })}
+            >
+              <SelectTrigger className="transition-all duration-150">
+                <SelectValue placeholder="Selecione..." />
+              </SelectTrigger>
+              <SelectContent>
+                {[
+                  'Dinheiro',
+                  'PIX',
+                  'Cartão de Crédito',
+                  'Cartão de Débito',
+                  'Transferência',
+                  'Boleto',
+                  'Outros',
+                ].map((f) => (
+                  <SelectItem key={f} value={f}>
+                    {f}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Observação / Descrição (Opcional)</Label>
             <Input
               value={formData.observacao}
               onChange={(e) => setFormData({ ...formData, observacao: e.target.value })}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-17T19:58:41.266Z",
+  "generatedAt": "2026-06-18T00:36:33.177Z",
   "collections": [
     {
       "name": "users",
@@ -233,6 +233,21 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "forma_pagamento",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "Dinheiro",
+            "PIX",
+            "Cartão de Crédito",
+            "Cartão de Débito",
+            "Transferência",
+            "Boleto",
+            "Outros"
+          ]
         }
       ],
       "indexes": []

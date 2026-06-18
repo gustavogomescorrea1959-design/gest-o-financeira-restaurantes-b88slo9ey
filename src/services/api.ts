@@ -15,6 +15,7 @@ export interface Entry extends RecordModel {
   valor: number
   tipo_movimentacao: 'entrada' | 'saida'
   observacao: string
+  forma_pagamento?: string
   expand?: { categoria_id: Category }
 }
 
@@ -84,6 +85,8 @@ export const api = {
     pb
       .collection('daily_entries')
       .create({ ...data, restaurant_id: pb.authStore.record?.restaurant_id }),
+  updateEntry: (id: string, data: Partial<Entry>) =>
+    pb.collection('daily_entries').update(id, data),
   deleteEntry: (id: string) => pb.collection('daily_entries').delete(id),
   getBudgets: (year: string) =>
     pb.collection<Budget>('budget_entries').getFullList({
