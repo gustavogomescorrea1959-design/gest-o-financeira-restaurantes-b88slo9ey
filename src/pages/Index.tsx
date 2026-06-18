@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { api, DashboardMetrics, Entry, BankBalance } from '@/services/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -59,67 +59,85 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
+  const loadDataRef = useRef(0)
+
   const [entryFormOpen, setEntryFormOpen] = useState(false)
   const [balanceFormOpen, setBalanceFormOpen] = useState(false)
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true)
-      setError(false)
-      const { start, end } = getTimeframeDates(timeframe)
+  const loadData = useCallback(
+    async (silent = false, retries = 3) => {
+      const reqId = ++loadDataRef.current
+      try {
+        if (!silent) setLoading(true)
+        if (!silent) setError(false)
+        const { start, end } = getTimeframeDates(timeframe)
 
-      const [metricsResult, recentResult, balanceResult] = await Promise.allSettled([
-        api.getDashboardMetrics(start.toISOString(), end.toISOString()),
-        api.getRecentEntries(),
-        api.getLatestBalance(),
-      ])
+        const [metricsResult, recentResult, balanceResult] = await Promise.allSettled([
+          api.getDashboardMetrics(start.toISOString(), end.toISOString()),
+          api.getRecentEntries(),
+          api.getLatestBalance(),
+        ])
 
-      if (metricsResult.status === 'fulfilled') {
-        setMetrics(metricsResult.value)
-      } else {
-        if (metricsResult.reason?.status !== 404) {
-          console.error('Failed to load metrics:', metricsResult.reason)
+        if (loadDataRef.current !== reqId) return
+
+        if (metricsResult.status === 'fulfilled') {
+          setMetrics(metricsResult.value)
+        } else if (!silent) {
+          if (metricsResult.reason?.status !== 404) {
+            console.error('Failed to load metrics:', metricsResult.reason)
+          }
+          setMetrics(null)
         }
-        setMetrics(null)
-      }
 
-      if (recentResult.status === 'fulfilled') {
-        setEntries(recentResult.value?.items || [])
-      } else {
-        if (recentResult.reason?.status !== 404) {
-          console.error('Failed to load entries:', recentResult.reason)
+        if (recentResult.status === 'fulfilled') {
+          setEntries(recentResult.value?.items || [])
+        } else if (!silent) {
+          if (recentResult.reason?.status !== 404) {
+            console.error('Failed to load entries:', recentResult.reason)
+          }
+          setEntries([])
         }
-        setEntries([])
-      }
 
-      if (balanceResult.status === 'fulfilled') {
-        setLatestBalance(balanceResult.value)
-      } else {
-        if (balanceResult.reason?.status !== 404) {
-          console.error('Failed to load balance:', balanceResult.reason)
+        if (balanceResult.status === 'fulfilled') {
+          setLatestBalance(balanceResult.value)
+        } else if (!silent) {
+          if (balanceResult.reason?.status !== 404) {
+            console.error('Failed to load balance:', balanceResult.reason)
+          }
+          setLatestBalance(null)
         }
-        setLatestBalance(null)
+      } catch (err) {
+        if (loadDataRef.current !== reqId) return
+        if (retries > 0) {
+          setTimeout(() => loadData(silent, retries - 1), 2000)
+          return
+        }
+        console.error(err)
+        if (!silent) setError(true)
+      } finally {
+        if (loadDataRef.current === reqId) {
+          if (!silent) setLoading(false)
+        }
       }
-    } catch (err) {
-      console.error(err)
-      setError(true)
-    } finally {
-      setLoading(false)
-    }
-  }, [timeframe])
+    },
+    [timeframe],
+  )
 
   useEffect(() => {
     loadData()
   }, [loadData])
 
   useRealtime('daily_entries', () => {
-    loadData()
+    loadData(true)
   })
   useRealtime('bank_balances', () => {
-    loadData()
+    loadData(true)
   })
   useRealtime('budget_entries', () => {
-    loadData()
+    loadData(true)
+  })
+  useRealtime('financial_categories', () => {
+    loadData(true)
   })
 
   const formatCurrency = (val: number) =>

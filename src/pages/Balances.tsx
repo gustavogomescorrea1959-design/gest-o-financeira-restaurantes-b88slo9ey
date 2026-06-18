@@ -36,15 +36,15 @@ export default function Balances() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [balanceToDelete, setBalanceToDelete] = useState<string | null>(null)
 
-  const loadData = async () => {
+  const loadData = async (silent = false) => {
     try {
-      setLoading(true)
+      if (!silent) setLoading(true)
       const data = await api.getAllBalances()
       setBalances(data)
     } catch (err) {
-      toast.error('Erro ao carregar saldos.')
+      if (!silent) toast.error('Erro ao carregar saldos.')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
     }
   }
 
@@ -53,7 +53,7 @@ export default function Balances() {
   }, [])
 
   useRealtime('bank_balances', () => {
-    loadData()
+    loadData(true)
   })
 
   const handleEdit = (b: BankBalance) => {
